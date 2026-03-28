@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Kanjis JLPT N4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        .kanji-text {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .correct {
+            background-color: #10b981 !important; /* Emerald 500 */
+            color: white !important;
+            border-color: #10b981 !important;
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* Red 500 */
+            color: white !important;
+            border-color: #ef4444 !important;
+        }
+        .hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <!-- App Container -->
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden relative">
+        
+        <!-- Header -->
+        <div class="bg-red-600 p-4 text-white text-center">
+            <h1 class="text-2xl font-bold tracking-wider">JLPT N4 KANJI</h1>
+            <p class="text-red-200 text-sm mt-1">Treinamento e Revisão</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="p-8 text-center">
+            <div class="text-6xl kanji-text mb-6 text-gray-800">漢</div>
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Bem-vindo ao Quiz!</h2>
+            <p class="text-gray-500 mb-8">Revise o significado dos 180 kanjis mais comuns do nível N4.</p>
+            
+            <div class="space-y-4">
+                <button onclick="startGame(20)" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200">
+                    Partida Rápida (20 Kanjis)
+                </button>
+                <button onclick="startGame(180)" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200">
+                    Desafio Completo (180 Kanjis)
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="p-6 hide">
+            <!-- Progress and Score -->
+            <div class="flex justify-between text-sm font-semibold text-gray-500 mb-4">
+                <span id="progress-text">Questão: 1/20</span>
+                <span id="score-text" class="text-red-600">Pontos: 0</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-8">
+                <div id="progress-bar" class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: 5%"></div>
+            </div>
+
+            <!-- Kanji Display -->
+            <div class="flex justify-center mb-8">
+                <div id="kanji-display" class="kanji-text text-8xl font-black text-gray-800 drop-shadow-sm">会</div>
+            </div>
+
+            <!-- Options -->
+            <div class="grid grid-cols-1 gap-3 mb-6" id="options-container">
+                <button class="option-btn border-2 border-gray-200 bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl text-left hover:border-red-400">Opção 1</button>
+                <button class="option-btn border-2 border-gray-200 bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl text-left hover:border-red-400">Opção 2</button>
+                <button class="option-btn border-2 border-gray-200 bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl text-left hover:border-red-400">Opção 3</button>
+                <button class="option-btn border-2 border-gray-200 bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl text-left hover:border-red-400">Opção 4</button>
+            </div>
+
+            <!-- Next Button -->
+            <button id="next-btn" onclick="nextQuestion()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 opacity-0 pointer-events-none">
+                Próxima Questão ➔
+            </button>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="p-8 text-center hide">
+            <div class="text-6xl mb-4">🏆</div>
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">Fim de Jogo!</h2>
+            <p class="text-gray-500 mb-6" id="result-message">Você completou o treino.</p>
+            
+            <div class="bg-gray-100 rounded-xl p-6 mb-8">
+                <p class="text-sm text-gray-500 uppercase tracking-wide font-semibold mb-1">Pontuação Final</p>
+                <p class="text-4xl font-black text-red-600" id="final-score">15 / 20</p>
+            </div>
+
+            <button onclick="returnToMenu()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200">
+                Voltar ao Menu
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-gray-400 text-sm text-center max-w-md">
+        <p>Desenvolvido para revisão focada no JLPT N4.</p>
+        <p>Sempre tente ler o kanji em sua mente antes de clicar!</p>
+    </div>
+
+    <script>
+        // Lista rigorosa de 180 Kanjis N4 (Kanjis do N5 filtrados com base no conhecimento prévio do utilizador)
+        const kanjiList = [
+            { k: "同", m: "Igual, Mesmo" }, { k: "事", m: "Assunto, Coisa (abstrata)" }, { k: "自", m: "Próprio, A si mesmo" },
+            { k: "発", m: "Partida, Emitir" }, { k: "者", m: "Pessoa (sufixo)" }, { k: "地", m: "Terra, Chão" },
+            { k: "業", m: "Negócio, Indústria" }, { k: "方", m: "Direção, Método" }, { k: "場", m: "Local, Espaço" },
+            { k: "員", m: "Membro, Funcionário" }, { k: "産", m: "Produzir, Dar à luz" }, { k: "開", m: "Abrir" },
+            { k: "力", m: "Força, Poder" }, { k: "問", m: "Perguntar, Questão" }, { k: "代", m: "Substituir, Tarifa" },
+            { k: "明", m: "Claro, Brilhante" }, { k: "動", m: "Mover, Movimento" }, { k: "京", m: "Capital" },
+            { k: "目", m: "Olho" }, { k: "通", m: "Passar, Comunicar" }, { k: "理", m: "Razão, Lógica" },
+            { k: "体", m: "Corpo" }, { k: "田", m: "Campo de arroz" }, { k: "主", m: "Mestre, Principal" },
+            { k: "題", m: "Tópico, Problema" }, { k: "意", m: "Ideia, Significado" }, { k: "不", m: "Não, Negativo" },
+            { k: "作", m: "Fazer, Produzir" }, { k: "用", m: "Tarefa, Uso" }, { k: "度", m: "Grau, Vezes" },
+            { k: "強", m: "Forte, Forçar" }, { k: "公", m: "Público, Oficial" }, { k: "持", m: "Segurar, Possuir" },
+            { k: "野", m: "Campo, Planície" }, { k: "以", m: "Por meio de, A partir de" }, { k: "思", m: "Pensar, Achar" },
+            { k: "世", m: "Mundo, Geração" }, { k: "正", m: "Correto, Justo" }, { k: "院", m: "Instituição" },
+            { k: "心", m: "Coração, Mente" }, { k: "界", m: "Mundo, Limite" }, { k: "教", m: "Ensinar, Religião" },
+            { k: "文", m: "Texto, Literatura" }, { k: "元", m: "Origem, Fundação" }, { k: "重", m: "Pesado, Importante" },
+            { k: "近", m: "Perto, Próximo" }, { k: "考", m: "Pensar, Considerar" }, { k: "画", m: "Desenho, Traço" },
+            { k: "海", m: "Mar, Oceano" }, { k: "売", m: "Vender" }, { k: "知", m: "Saber, Conhecer" },
+            { k: "集", m: "Reunir, Colecionar" }, { k: "別", m: "Separar, Diferente" }, { k: "物", m: "Coisa (física), Objeto" },
+            { k: "使", m: "Usar, Utilizar" }, { k: "品", m: "Produto, Qualidade" }, { k: "計", m: "Medir, Plano" },
+            { k: "死", m: "Morrer, Morte" }, { k: "特", m: "Especial, Particular" }, { k: "私", m: "Eu, Privado" },
+            { k: "始", m: "Começar, Iniciar" }, { k: "朝", m: "Manhã" }, { k: "運", m: "Carregar, Sorte" },
+            { k: "終", m: "Terminar, Fim" }, { k: "台", m: "Suporte, Máquina" }, { k: "広", m: "Amplo, Espaçoso" },
+            { k: "住", m: "Morar, Residir" }, { k: "無", m: "Nada, Inexistente" }, { k: "真", m: "Verdade, Realidade" },
+            { k: "急", m: "Urgente, Apressar" }, { k: "送", m: "Enviar, Remeter" }, { k: "切", m: "Cortar, Importante" },
+            { k: "転", m: "Rodar, Virar" }, { k: "研", m: "Afiar, Pesquisar" }, { k: "究", m: "Pesquisar, Investigar" },
+            { k: "楽", m: "Música, Divertido" }, { k: "起", m: "Acordar, Levantar" }, { k: "着", m: "Vestir, Chegar" },
+            { k: "病", m: "Doença" }, { k: "質", m: "Qualidade, Matéria" }, { k: "待", m: "Esperar" },
+            { k: "試", m: "Testar, Tentar" }, { k: "族", m: "Tribo, Família" }, { k: "銀", m: "Prata" },
+            { k: "早", m: "Cedo, Rápido" }, { k: "映", m: "Refletir, Projetar" }, { k: "親", m: "Pais, Íntimo" },
+            { k: "験", m: "Teste, Efeito" }, { k: "英", m: "Inglaterra, Brilhante" }, { k: "医", m: "Médico, Medicina" },
+            { k: "仕", m: "Servir, Fazer" }, { k: "去", m: "Passado, Sair" }, { k: "味", m: "Sabor, Gosto" },
+            { k: "写", m: "Copiar, Fotografia" }, { k: "字", m: "Caractere, Letra" }, { k: "答", m: "Responder, Resposta" },
+            { k: "夜", m: "Noite" }, { k: "音", m: "Som, Barulho" }, { k: "注", m: "Anotar, Derramar" },
+            { k: "帰", m: "Voltar para casa, Retornar" }, { k: "歌", m: "Cantar, Música" }, { k: "悪", m: "Mau, Ruim" },
+            { k: "図", m: "Mapa, Desenho" }, { k: "室", m: "Sala, Quarto" }, { k: "歩", m: "Andar, Passo" },
+            { k: "風", m: "Vento, Estilo" }, { k: "紙", m: "Papel" }, { k: "春", m: "Primavera" },
+            { k: "館", m: "Prédio público, Mansão" }, { k: "屋", m: "Telhado, Loja" }, { k: "色", m: "Cor" },
+            { k: "夏", m: "Verão" }, { k: "秋", m: "Outono" }, { k: "冬", m: "Inverno" },
+            { k: "牛", m: "Vaca, Boi" }, { k: "豚", m: "Porco" }, { k: "飯", m: "Refeição, Arroz cozido" },
+            { k: "茶", m: "Chá" }, { k: "鳥", m: "Pássaro" }, { k: "肉", m: "Carne" },
+            { k: "勉", m: "Esforço, Estudo" }, { k: "昼", m: "Meio-dia, Tarde" }, { k: "夕", m: "Tardezinha, Crepúsculo" },
+            { k: "乗", m: "Embarcar, Montar" }, { k: "借", m: "Pegar emprestado" }, { k: "貸", m: "Alugar, Emprestar" },
+            { k: "走", m: "Correr" }, { k: "建", m: "Construir" }, { k: "洗", m: "Lavar" },
+            { k: "漢", m: "China (Dinastia Han)" }, { k: "服", m: "Roupa, Obedecer" }, { k: "港", m: "Porto" },
+            { k: "旅", m: "Viagem" }, { k: "習", m: "Aprender, Hábito" }, { k: "宿", m: "Pousada, Alojar" },
+            { k: "留", m: "Manter, Reter" }, { k: "門", m: "Portão" }, { k: "薬", m: "Remédio, Droga" },
+            { k: "雪", m: "Neve" }, { k: "雲", m: "Nuvem" }, { k: "池", m: "Lago, Tanque" },
+            { k: "遠", m: "Longe, Distante" }, { k: "弱", m: "Fraco" }, { k: "暗", m: "Escuro" },
+            { k: "短", m: "Curto" }, { k: "暑", m: "Quente (Clima)" }, { k: "寒", m: "Frio (Clima)" },
+            { k: "低", m: "Baixo" }, { k: "有", m: "Ter, Existir" }, { k: "洋", m: "Oceano, Ocidente" },
+            { k: "堂", m: "Salão público" }, { k: "痛", m: "Dor, Doer" }, { k: "働", m: "Trabalhar" },
+            { k: "止", m: "Parar" }, { k: "声", m: "Voz" }, { k: "林", m: "Bosque" },
+            { k: "森", m: "Floresta" }, { k: "糸", m: "Fio, Linha" }, { k: "貝", m: "Concha" },
+            { k: "寺", m: "Templo budista" }, { k: "島", m: "Ilha" }, { k: "村", m: "Vila, Aldeia" },
+            { k: "州", m: "Estado, Província" }, { k: "橋", m: "Ponte" }, { k: "都", m: "Capital, Metrópole" },
+            { k: "県", m: "Prefeitura, Província" }, { k: "区", m: "Distrito, Bairro" }, { k: "鉄", m: "Ferro" },
+            { k: "弓", m: "Arco" }, { k: "皿", m: "Prato" }, { k: "血", m: "Sangue" },
+            { k: "頭", m: "Cabeça" }, { k: "顔", m: "Rosto, Face" }, { k: "首", m: "Pescoço" },
+            { k: "毛", m: "Cabelo, Pelo" }, { k: "星", m: "Estrela" }, { k: "晴", m: "Ensolarado, Limpo" },
+            { k: "光", m: "Luz, Brilho" }, { k: "黄", m: "Amarelo" }, { k: "記", m: "Anotar, Registro" }
+        ];
+
+        // Ensure exactly 180 unique or closely bounded items for the array to match the requested 180 (list has ~180 entries)
+        
+        let currentModeLimit = 20;
+        let questionPool = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentCorrectAnswer = null;
+        let answered = false;
+
+        // DOM Elements
+        const screens = {
+            start: document.getElementById('start-screen'),
+            game: document.getElementById('game-screen'),
+            result: document.getElementById('result-screen')
+        };
+        const ui = {
+            progressText: document.getElementById('progress-text'),
+            scoreText: document.getElementById('score-text'),
+            progressBar: document.getElementById('progress-bar'),
+            kanjiDisplay: document.getElementById('kanji-display'),
+            optionsContainer: document.getElementById('options-container'),
+            nextBtn: document.getElementById('next-btn'),
+            finalScore: document.getElementById('final-score'),
+            resultMessage: document.getElementById('result-message')
+        };
+
+        // Utility: Shuffle Array
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Initialize Game
+        function startGame(limit) {
+            currentModeLimit = limit;
+            score = 0;
+            currentQuestionIndex = 0;
+            
+            // Create a shuffled copy of the kanji list for the questions
+            questionPool = shuffle([...kanjiList]).slice(0, currentModeLimit);
+
+            switchScreen('game');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            ui.nextBtn.classList.add('opacity-0', 'pointer-events-none');
+            
+            // Update Progress
+            const questionNumber = currentQuestionIndex + 1;
+            ui.progressText.textContent = `Questão: ${questionNumber}/${currentModeLimit}`;
+            ui.scoreText.textContent = `Pontos: ${score}`;
+            ui.progressBar.style.width = `${(questionNumber / currentModeLimit) * 100}%`;
+
+            // Setup Question
+            const currentItem = questionPool[currentQuestionIndex];
+            currentCorrectAnswer = currentItem;
+            ui.kanjiDisplay.textContent = currentItem.k;
+
+            // Generate Options (1 correct, 3 wrong)
+            let options = [currentItem];
+            let safeList = kanjiList.filter(k => k.k !== currentItem.k);
+            safeList = shuffle(safeList);
+            options.push(safeList[0], safeList[1], safeList[2]);
+            options = shuffle(options);
+
+            // Render Options
+            ui.optionsContainer.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn border-2 border-gray-200 bg-white text-gray-700 font-semibold py-3 px-4 rounded-xl text-left hover:border-red-400';
+                btn.textContent = opt.m;
+                btn.onclick = () => selectAnswer(btn, opt);
+                ui.optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(buttonElement, selectedOption) {
+            if (answered) return;
+            answered = true;
+
+            const buttons = ui.optionsContainer.querySelectorAll('button');
+            
+            // Disable all buttons
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('hover:border-red-400');
+                
+                // Highlight correct answer
+                if (btn.textContent === currentCorrectAnswer.m) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            // Check if selected is correct
+            if (selectedOption.m === currentCorrectAnswer.m) {
+                score++;
+                ui.scoreText.textContent = `Pontos: ${score}`;
+            } else {
+                buttonElement.classList.add('incorrect');
+            }
+
+            // Show Next Button
+            ui.nextBtn.classList.remove('opacity-0', 'pointer-events-none');
+            ui.nextBtn.textContent = (currentQuestionIndex === currentModeLimit - 1) ? 'Ver Resultados 🏆' : 'Próxima Questão ➔';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= currentModeLimit) {
+                showResults();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            switchScreen('result');
+            ui.finalScore.textContent = `${score} / ${currentModeLimit}`;
+            
+            let percentage = score / currentModeLimit;
+            if (percentage === 1) {
+                ui.resultMessage.textContent = "Perfeito! Você domina o N4!";
+            } else if (percentage >= 0.7) {
+                ui.resultMessage.textContent = "Ótimo trabalho! Seu conhecimento é sólido.";
+            } else if (percentage >= 0.5) {
+                ui.resultMessage.textContent = "Bom começo, mas continue revisando.";
+            } else {
+                ui.resultMessage.textContent = "Continue estudando! Kanjis requerem prática diária.";
+            }
+        }
+
+        function returnToMenu() {
+            switchScreen('start');
+        }
+
+        function switchScreen(screenName) {
+            screens.start.classList.add('hide');
+            screens.game.classList.add('hide');
+            screens.result.classList.add('hide');
+            
+            screens[screenName].classList.remove('hide');
+        }
+    </script>
+</body>
+</html>
